@@ -2,9 +2,7 @@ import json
 import requests
 from time import sleep
 
-FORECAST_CREATE_URL = "https://api.direct.yandex.ru/json/v4"
-FORECAST_LIST_URL = "https://api.direct.yandex.ru/json/v4"
-FORECAST_GET_URL = "https://api.direct.yandex.ru/json/v4"
+URL = "https://api.direct.yandex.ru/json/v4"
 WAIT_SECONDS = 2
 MAX_ATTEMPTS = 10
 
@@ -26,7 +24,7 @@ def import_forecast_shows(token: str, forecast_body: dict):
     }
 
     try:
-        response = requests.post(FORECAST_CREATE_URL, json=forecast_create_payload, headers=headers)
+        response = requests.post(URL, json=forecast_create_payload, headers=headers)
         response_data = response.json()
         forecast_id = response_data.get("data")
         if not forecast_id:
@@ -44,7 +42,7 @@ def import_forecast_shows(token: str, forecast_body: dict):
         }
 
         try:
-            list_response = requests.post(FORECAST_LIST_URL, json=forecast_list_payload, headers=headers)
+            list_response = requests.post(URL, json=forecast_list_payload, headers=headers)
             list_data = list_response.json().get("data", [])
         except Exception as e:
             return {"error": f"Ошибка при получении статуса прогноза: {str(e)}"}
@@ -52,7 +50,7 @@ def import_forecast_shows(token: str, forecast_body: dict):
         forecast_status = None
         for item in list_data:
             if item["ForecastID"] == forecast_id:
-                forecast_status = item["Status"]
+                forecast_status = item["StatusForecast"]
                 break
 
         if forecast_status == "Done":
@@ -72,7 +70,7 @@ def import_forecast_shows(token: str, forecast_body: dict):
     }
 
     try:
-        final_response = requests.post(FORECAST_GET_URL, json=forecast_get_payload, headers=headers)
+        final_response = requests.post(URL, json=forecast_get_payload, headers=headers)
         final_data = final_response.json().get("data", {})
         phrases_data = [
             {
